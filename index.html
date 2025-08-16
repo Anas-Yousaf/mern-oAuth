@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Authentication Notes - Exam Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: white;
+            color: #333;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin: 30px 0 15px 0;
+            font-size: 1.8em;
+            border-left: 4px solid #27ae60;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #16a085;
+            margin: 25px 0 10px 0;
+            font-size: 1.3em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre;
+            tab-size: 2;
+        }
+
+        .filename {
+            background-color: #2c3e50;
+            color: white;
+            padding: 8px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: 0;
+        }
+
+        .filename + .code-block {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .highlight {
+            background-color: #d5f4e6;
+            padding: 15px;
+            border-left: 4px solid #27ae60;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .note {
+            background-color: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #27ae60;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: #16a085;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .oauth-flow {
+            background-color: #f8fcff;
+            border: 2px solid #3498db;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .step-number {
+            background-color: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-text {
+            flex: 1;
+        }
+
+        .provider-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .provider-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .provider-btn:hover {
+            opacity: 0.8;
+        }
+
+        .google-btn { background-color: #db4437; }
+        .facebook-btn { background-color: #3b5998; }
+        .github-btn { background-color: #333; }
+        .twitter-btn { background-color: #1da1f2; }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .code-block {
+                font-size: 12px;
+                padding: 15px;
+            }
+
+            .flow-step {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .step-number {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OAuth Authentication Notes (Exam Version)</h1>
+        
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#intro">1. Introduction to OAuth</a></li>
+                <li><a href="#how-oauth-works">2. How OAuth Works (The Flow)</a></li>
+                <li><a href="#setup-google">3. Setting Up Google OAuth</a></li>
+                <li><a href="#implementation">4. Simple OAuth Implementation</a></li>
+                <li><a href="#complete-example">5. Complete Single File Example</a></li>
+            </ul>
+        </div>
+
+        <section id="intro">
+            <h2>1. Introduction to OAuth</h2>
+            
+            <h3>What is OAuth?</h3>
+            <p><strong>OAuth</strong> (Open Authorization) allows users to login using their existing accounts from Google, Facebook, GitHub, etc. Instead of creating new passwords, users can say <em>"Login with Google"</em>.</p>
+
+            <div class="provider-buttons">
+                <div class="provider-btn google-btn">Login with Google</div>
+                <div class="provider-btn facebook-btn">Login with Facebook</div>
+                <div class="provider-btn github-btn">Login with GitHub</div>
+                <div class="provider-btn twitter-btn">Login with Twitter</div>
+            </div>
+
+            <h3>Why Use OAuth?</h3>
+            <ul>
+                <li><strong>No Password Storage:</strong> You don't handle user passwords</li>
+                <li><strong>User Convenience:</strong> Users don't create new accounts</li>
+                <li><strong>Trusted Providers:</strong> Google/Facebook handle security</li>
+                <li><strong>Quick Setup:</strong> Users login in 2 clicks</li>
+            </ul>
+
+            <h3>OAuth vs Traditional Login</h3>
+            <div class="code-block">Traditional Login:
+User → Enter Email/Password → Your Server → Database Check
+
+OAuth Login:
+User → Click "Google Login" → Google → Your App Gets User Info</div>
+
+            <div class="highlight">
+                <strong>Simple Explanation:</strong> OAuth is like using your driver's license to prove your age at a bar, instead of the bar creating their own ID card for you.
+            </div>
+        </section>
+
+        <section id="how-oauth-works">
+            <h2>2. How OAuth Works (The Flow)</h2>
+            
+            <div class="oauth-flow">
+                <h3>OAuth Flow in 6 Simple Steps</h3>
+                
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <strong>User clicks "Login with Google"</strong><br>
+                        User wants to login to your app
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <strong>Redirect to Google</strong><br>
+                        Your app sends user to Google's login page
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <strong>User logs into Google</strong><br>
+                        User enters their Google email/password
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">
+                        <strong>Google asks permission</strong><br>
+                        "Allow MyApp to access your basic info?"
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">
+                        <strong>Google sends code to your app</strong><br>
+                        Google redirects back with authorization code
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">6</div>
+                    <div class="step-text">
+                        <strong>Your app gets user info</strong><br>
+                        Exchange code for user details (name, email)
+                    </div>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>Exam Tip:</strong> Remember the flow as: Click → Redirect → Login → Permission → Code → User Info
+            </div>
+        </section>
+
+        <section id="setup-google">
+            <h2>3. Setting Up Google OAuth</h2>
+            
+            <h3>Step 1: Get Google Credentials</h3>
+            <ol>
+                <li>Go to <strong>Google Cloud Console</strong></li>
+                <li>Create new project or select existing</li>
+                <li>Enable <strong>Google+ API</strong></li>
+                <li>Create <strong>OAuth 2.0 credentials</strong></li>
+                <li>Set redirect URI: <code>http://localhost:3000/auth/google/callback</code></li>
+            </ol>
+
+            <h3>You'll Get:</h3>
+            <div class="code-block">CLIENT_ID = "123456789-abcdef.apps.googleusercontent.com"
+CLIENT_SECRET = "GOCSPX-abcdef123456"</div>
+
+            <h3>Required Packages</h3>
+            <div class="filename">package.json</div>
+            <div class="code-block">{
+  "name": "oauth-app",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.18.0",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
+    "express-session": "^1.17.3"
+  }
+}</div>
+
+            <div class="note">
+                <strong>For Exams:</strong> You don't need to actually create Google credentials. Just use dummy values and focus on the code structure.
+            </div>
+        </section>
+
+        <section id="implementation">
+            <h2>4. Simple OAuth Implementation</h2>
+            
+            <h3>Basic Passport Setup</h3>
+            <div class="code-block">const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+// Configure Google OAuth
+passport.use(new GoogleStrategy({
+  clientID: 'your-client-id',
+  clientSecret: 'your-client-secret',
+  callbackURL: '/auth/google/callback'
+}, (accessToken, refreshToken, profile, done) => {
+  // This runs when user successfully logs in
+  const user = {
+    id: profile.id,
+    name: profile.displayName,
+    email: profile.emails[0].value
+  };
+  return done(null, user);
+}));
+
+// Serialize user (save to session)
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+// Deserialize user (get from session)
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});</div>
+
+            <h3>OAuth Routes</h3>
+            <div class="code-block">// Start OAuth process
+app.get('/auth/google', 
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Handle callback from Google
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    // Success! Redirect to dashboard
+    res.redirect('/dashboard');
+  }
+);
+
+// Logout
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});</div>
+
+            <div class="highlight">
+                <strong>Key Points:</strong>
+                <ul>
+                    <li><strong>Strategy:</strong> Configures how to handle Google OAuth</li>
+                    <li><strong>Scope:</strong> What info to request (profile, email)</li>
+                    <li><strong>Callback:</strong> Where Google sends user back</li>
+                    <li><strong>Serialize:</strong> Save user to session</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="complete-example">
+            <h2>5. Complete Single File Example</h2>
+            
+            <h3>Complete OAuth App (One File)</h3>
+            <div class="filename">oauth-app.js</div>
+            <div class="code-block">const express = require('express');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
+const app = express();
+
+// Session middleware
+app.use(session({
+  secret: 'oauth-secret',
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Google OAuth Strategy
+passport.use(new GoogleStrategy({
+  clientID: 'your-google-client-id',
+  clientSecret: 'your-google-client-secret',
+  callbackURL: '/auth/google/callback'
+}, (accessToken, refreshToken, profile, done) => {
+  // Create user object from Google profile
+  const user = {
+    id: profile.id,
+    name: profile.displayName,
+    email: profile.emails[0].value,
+    photo: profile.photos[0].value
+  };
+  return done(null, user);
+}));
+
+// Serialize/Deserialize
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
+// Middleware to check if user is logged in
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/');
+};
+
+// Routes
+app.get('/', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.redirect('/dashboard');
+  } else {
+    res.send(`
+      <h1>OAuth Demo</h1>
+      <a href="/auth/google">
+        <button style="padding: 10px 20px; background: #db4437; color: white; border: none; border-radius: 5px;">
+          Login with Google
+        </button>
+      </a>
+    `);
+  }
+});
+
+// Start OAuth process
+app.get('/auth/google', 
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Handle OAuth callback
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/dashboard');
+  }
+);
+
+// Protected dashboard
+app.get('/dashboard', isLoggedIn, (req, res) => {
+  res.send(`
+    <h1>Welcome, ${req.user.name}!</h1>
+    <img src="${req.user.photo}" alt="Profile" style="width: 100px; border-radius: 50%;">
+    <p>Email: ${req.user.email}</p>
+    <p>Google ID: ${req.user.id}</p>
+    <a href="/logout">
+      <button style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px;">
+        Logout
+      </button>
+    </a>
+  `);
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.redirect('/');
+  });
+});
+
+app.listen(3000, () => {
+  console.log('OAuth app running on port 3000');
+});</div>
+
+            <h3>Simple HTML Client (Optional)</h3>
+            <div class="filename">public/index.html</div>
+            <div class="code-block">&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;OAuth Demo&lt;/title&gt;
+  &lt;style&gt;
+    body { font-family: Arial; text-align: center; margin-top: 100px; }
+    .oauth-btn { 
+      padding: 15px 30px; 
+      font-size: 16px; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin: 10px;
+    }
+    .google { background: #db4437; color: white; }
+    .facebook { background: #3b5998; color: white; }
+    .github { background: #333; color: white; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;OAuth Authentication Demo&lt;/h1&gt;
+  &lt;p&gt;Choose your login method:&lt;/p&gt;
+  
+  &lt;a href="/auth/google" class="oauth-btn google"&gt;
+    📧 Login with Google
+  &lt;/a&gt;
+  
+  &lt;a href="/auth/facebook" class="oauth-btn facebook"&gt;
+    📘 Login with Facebook
+  &lt;/a&gt;
+  
+  &lt;a href="/auth/github" class="oauth-btn github"&gt;
+    🐙 Login with GitHub
+  &lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</div>
+
+            <h3>Multiple Providers (Bonus)</h3>
+            <div class="code-block">// Facebook Strategy
+const FacebookStrategy = require('passport-facebook').Strategy;
+
+passport.use(new FacebookStrategy({
+  clientID: 'facebook-app-id',
+  clientSecret: 'facebook-app-secret',
+  callbackURL: '/auth/facebook/callback',
+  profileFields: ['id', 'displayName', 'email']
+}, (accessToken, refreshToken, profile, done) => {
+  const user = {
+    id: profile.id,
+    name: profile.displayName,
+    email: profile.emails[0].value
+  };
+  return done(null, user);
+}));
+
+// Facebook routes
+app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/' }),
+  (req, res) => res.redirect('/dashboard')
+);</div>
+
+            <div class="highlight">
+                <h3>Exam Key Points</h3>
+                <ul>
+                    <li><strong>Passport.js:</strong> Handles OAuth strategies</li>
+                    <li><strong>Strategy:</strong> Configuration for each provider</li>
+                    <li><strong>Two routes:</strong> Start OAuth + Handle callback</li>
+                    <li><strong>Session:</strong> Store user info after login</li>
+                    <li><strong>Middleware:</strong> Protect routes with isLoggedIn check</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <h3>Quick Steps for Exam:</h3>
+                <ol>
+                    <li><strong>Install:</strong> passport, passport-google-oauth20</li>
+                    <li><strong>Configure strategy:</strong> clientID, clientSecret, callback</li>
+                    <li><strong>Create routes:</strong> /auth/google and /auth/google/callback</li>
+                    <li><strong>Handle user:</strong> Extract profile info in strategy</li>
+                    <li><strong>Protect routes:</strong> Use isAuthenticated() middleware</li>
+                </ol>
+            </div>
+
+            <h3>Ultra Minimal Version (15 lines)</h3>
+            <div class="filename">minimal-oauth.js</div>
+            <div class="code-block">const express = require('express');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const app = express();
+
+app.use(require('express-session')({ secret: 'secret', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new GoogleStrategy({
+  clientID: 'client-id', clientSecret: 'client-secret', callbackURL: '/callback'
+}, (token, secret, profile, done) => done(null, profile)));
+
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
+app.get('/auth', passport.authenticate('google', { scope: ['profile'] }));
+app.get('/callback', passport.authenticate('google'), (req, res) => res.send(`Hello ${req.user.displayName}`));
+
+app.listen(3000);</div>
+        </section>
+
+        <div class="footer">
+            <p>Notes created by <strong>Anas Mughal</strong></p>
+        </div>
+    </div>
+</body>
+</html>
